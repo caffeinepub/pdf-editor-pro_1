@@ -1,0 +1,124 @@
+@font-face {
+  font-family: "Cabinet Grotesk";
+  src: url("/assets/fonts/CabinetGrotesk-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/assets/fonts/GeistMono-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Mona Sans";
+  src: url("/assets/fonts/MonaSans-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dark professional PDF editor theme */
+    --background: 0.1 0.012 260;
+    --foreground: 0.94 0.006 260;
+    --card: 0.14 0.01 260;
+    --card-foreground: 0.94 0.006 260;
+    --popover: 0.14 0.01 260;
+    --popover-foreground: 0.94 0.006 260;
+    --primary: 0.74 0.14 200;
+    --primary-foreground: 0.1 0.012 260;
+    --secondary: 0.18 0.01 260;
+    --secondary-foreground: 0.94 0.006 260;
+    --muted: 0.18 0.008 260;
+    --muted-foreground: 0.55 0.01 260;
+    --accent: 0.22 0.012 260;
+    --accent-foreground: 0.94 0.006 260;
+    --destructive: 0.6 0.22 25;
+    --destructive-foreground: 0.98 0.005 260;
+    --border: 0.22 0.008 260;
+    --input: 0.2 0.01 260;
+    --ring: 0.74 0.14 200;
+    --radius: 0.375rem;
+    --chart-1: 0.74 0.14 200;
+    --chart-2: 0.72 0.16 150;
+    --chart-3: 0.76 0.15 50;
+    --chart-4: 0.7 0.17 310;
+    --chart-5: 0.65 0.18 25;
+    --sidebar: 0.13 0.01 260;
+    --sidebar-foreground: 0.94 0.006 260;
+    --sidebar-primary: 0.74 0.14 200;
+    --sidebar-primary-foreground: 0.1 0.012 260;
+    --sidebar-accent: 0.18 0.01 260;
+    --sidebar-accent-foreground: 0.94 0.006 260;
+    --sidebar-border: 0.2 0.008 260;
+    --sidebar-ring: 0.74 0.14 200;
+  }
+
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Cabinet Grotesk", "Mona Sans", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  #root {
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+@layer utilities {
+  .font-mono-code {
+    font-family: "Geist Mono", "JetBrains Mono", monospace;
+  }
+
+  .toolbar-btn {
+    @apply flex items-center justify-center w-9 h-9 rounded-md transition-colors;
+    @apply text-muted-foreground hover:text-foreground hover:bg-accent;
+  }
+
+  .toolbar-btn.active {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  .toolbar-btn:disabled {
+    @apply opacity-40 cursor-not-allowed;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: oklch(var(--background));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: oklch(var(--border));
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: oklch(var(--muted-foreground));
+  }
+}
