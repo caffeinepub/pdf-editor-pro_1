@@ -89,55 +89,106 @@ export class ExternalBlob {
         return this;
     }
 }
-export interface backendInterface {
-    getPreference(key: string): Promise<string>;
-    ping(): Promise<boolean>;
-    setPreference(key: string, value: string): Promise<void>;
+export interface Preferences {
+    recentTools: Array<string>;
+    darkMode: boolean;
+    sessionMetadata?: {
+        fileName: string;
+        pageCount: bigint;
+    };
 }
+export interface backendInterface {
+    getPreferences(): Promise<Preferences>;
+    setPreferences(prefs: Preferences): Promise<void>;
+}
+import type { Preferences as _Preferences } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
-    async getPreference(arg0: string): Promise<string> {
+    async getPreferences(): Promise<Preferences> {
         if (this.processError) {
             try {
-                const result = await this.actor.getPreference(arg0);
+                const result = await this.actor.getPreferences();
+                return from_candid_Preferences_n1(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getPreferences();
+            return from_candid_Preferences_n1(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async setPreferences(arg0: Preferences): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.setPreferences(to_candid_Preferences_n4(this._uploadFile, this._downloadFile, arg0));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getPreference(arg0);
+            const result = await this.actor.setPreferences(to_candid_Preferences_n4(this._uploadFile, this._downloadFile, arg0));
             return result;
         }
     }
-    async ping(): Promise<boolean> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.ping();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.ping();
-            return result;
-        }
-    }
-    async setPreference(arg0: string, arg1: string): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.setPreference(arg0, arg1);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.setPreference(arg0, arg1);
-            return result;
-        }
-    }
+}
+function from_candid_Preferences_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Preferences): Preferences {
+    return from_candid_record_n2(_uploadFile, _downloadFile, value);
+}
+function from_candid_opt_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [{
+        fileName: string;
+        pageCount: bigint;
+    }]): {
+    fileName: string;
+    pageCount: bigint;
+} | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_record_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    recentTools: Array<string>;
+    darkMode: boolean;
+    sessionMetadata: [] | [{
+            fileName: string;
+            pageCount: bigint;
+        }];
+}): {
+    recentTools: Array<string>;
+    darkMode: boolean;
+    sessionMetadata?: {
+        fileName: string;
+        pageCount: bigint;
+    };
+} {
+    return {
+        recentTools: value.recentTools,
+        darkMode: value.darkMode,
+        sessionMetadata: record_opt_to_undefined(from_candid_opt_n3(_uploadFile, _downloadFile, value.sessionMetadata))
+    };
+}
+function to_candid_Preferences_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Preferences): _Preferences {
+    return to_candid_record_n5(_uploadFile, _downloadFile, value);
+}
+function to_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    recentTools: Array<string>;
+    darkMode: boolean;
+    sessionMetadata?: {
+        fileName: string;
+        pageCount: bigint;
+    };
+}): {
+    recentTools: Array<string>;
+    darkMode: boolean;
+    sessionMetadata: [] | [{
+            fileName: string;
+            pageCount: bigint;
+        }];
+} {
+    return {
+        recentTools: value.recentTools,
+        darkMode: value.darkMode,
+        sessionMetadata: value.sessionMetadata ? candid_some(value.sessionMetadata) : candid_none()
+    };
 }
 export interface CreateActorOptions {
     agent?: Agent;

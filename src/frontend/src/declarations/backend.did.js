@@ -8,19 +8,33 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const Preferences = IDL.Record({
+  'recentTools' : IDL.Vec(IDL.Text),
+  'darkMode' : IDL.Bool,
+  'sessionMetadata' : IDL.Opt(
+    IDL.Record({ 'fileName' : IDL.Text, 'pageCount' : IDL.Nat })
+  ),
+});
+
 export const idlService = IDL.Service({
-  'getPreference' : IDL.Func([IDL.Text], [IDL.Text], ['query']),
-  'ping' : IDL.Func([], [IDL.Bool], ['query']),
-  'setPreference' : IDL.Func([IDL.Text, IDL.Text], [], []),
+  'getPreferences' : IDL.Func([], [Preferences], ['query']),
+  'setPreferences' : IDL.Func([Preferences], [], []),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const Preferences = IDL.Record({
+    'recentTools' : IDL.Vec(IDL.Text),
+    'darkMode' : IDL.Bool,
+    'sessionMetadata' : IDL.Opt(
+      IDL.Record({ 'fileName' : IDL.Text, 'pageCount' : IDL.Nat })
+    ),
+  });
+  
   return IDL.Service({
-    'getPreference' : IDL.Func([IDL.Text], [IDL.Text], ['query']),
-    'ping' : IDL.Func([], [IDL.Bool], ['query']),
-    'setPreference' : IDL.Func([IDL.Text, IDL.Text], [], []),
+    'getPreferences' : IDL.Func([], [Preferences], ['query']),
+    'setPreferences' : IDL.Func([Preferences], [], []),
   });
 };
 

@@ -10,10 +10,14 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface Preferences {
+  'recentTools' : Array<string>,
+  'darkMode' : boolean,
+  'sessionMetadata' : [] | [{ 'fileName' : string, 'pageCount' : bigint }],
+}
 export interface _SERVICE {
-  'getPreference' : ActorMethod<[string], string>,
-  'ping' : ActorMethod<[], boolean>,
-  'setPreference' : ActorMethod<[string, string], undefined>,
+  'getPreferences' : ActorMethod<[], Preferences>,
+  'setPreferences' : ActorMethod<[Preferences], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

@@ -7,8 +7,15 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export interface Preferences {
+    recentTools: Array<string>;
+    darkMode: boolean;
+    sessionMetadata?: {
+        fileName: string;
+        pageCount: bigint;
+    };
+}
 export interface backendInterface {
-    getPreference(key: string): Promise<string>;
-    ping(): Promise<boolean>;
-    setPreference(key: string, value: string): Promise<void>;
+    getPreferences(): Promise<Preferences>;
+    setPreferences(prefs: Preferences): Promise<void>;
 }

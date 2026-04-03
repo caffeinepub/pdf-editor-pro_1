@@ -1,63 +1,67 @@
-# PDF Editor Pro
+# PDF Editor Pro - Ultimate Edition
 
 ## Current State
-A browser-based PDF editor with:
-- Text overlays (add, edit, move, resize)
-- Erase/cover tool (white rectangle overlay)
-- Image placement (upload PNG/JPG and position)
-- Select/move/resize elements
-- Undo/redo history
-- Zoom controls + fit-width
-- Page thumbnail sidebar
+The project has a working browser-based PDF editor with:
+- PDF upload via pdf.js rendering
+- Text annotation tool (place text anywhere)
+- Erase/cover tool (white box overlay)
+- Image insertion tool
+- Select/move/delete elements
+- Undo/redo (Ctrl+Z / Ctrl+Y)
+- Zoom & page navigation with thumbnail sidebar
+- Drawing tools: highlight, freehand, shapes (rect/ellipse/line/arrow)
+- Stamps: APPROVED, DRAFT, CONFIDENTIAL, etc.
+- Sticky notes
+- Signature pad
+- Multi-select, copy/paste, duplicate
+- Per-element opacity
+- Font family and bold toggle
 - PDF export via pdf-lib
-- Keyboard shortcuts (v, t, e, i, Ctrl+Z/Y, Delete, Escape)
+
+Frontend components: PDFEditor.tsx, PDFToolbar.tsx, PDFSidebar.tsx, ThumbnailCanvas.tsx, types/pdf.ts
 
 ## Requested Changes (Diff)
 
 ### Add
-- **Highlight tool** (H): draw translucent colored rectangles to highlight content; color picker for highlight color; exported as translucent rect in PDF
-- **Freehand draw tool** (D): SVG path drawing with configurable pen color and stroke width; renders as SVG overlay; exported as SVG image embedded in PDF
-- **Shape tools**: rectangle, ellipse, line, arrow -- configurable stroke color, fill color, stroke width
-- **Stamp tool**: pre-made stamps (APPROVED, DRAFT, CONFIDENTIAL, REJECTED, VOID, FOR REVIEW); placed as colored text overlays
-- **Sticky notes / comments**: click to place a small note icon; expand on click to show/edit note text; exported as text annotation
-- **Signature tool**: dedicated draw-pad dialog to draw a signature, then place it on the PDF (transparent background)
-- **Multi-font support**: dropdown to select font family (Helvetica, Times Roman, Courier) for text tool
-- **Text formatting**: bold toggle for text tool
-- **Page management**: rotate page CW/CCW in sidebar per-page; delete current page; add blank page after current; exported correctly in PDF
-- **Copy/Paste/Duplicate**: Ctrl+C / Ctrl+V / Ctrl+D to duplicate selected element
-- **Multi-select**: Shift+click to select multiple elements; move as group
-- **Grid / Snap to grid toggle**: optional 10px grid overlay with snap behavior
-- **Opacity control**: slider for opacity of selected element (text, images, shapes)
-- **Scroll wheel zoom**: Ctrl+scroll to zoom in/out on canvas area
-- **Keyboard shortcut help panel**: ? key or button to show all shortcuts
-- **Open new PDF without page refresh**: already present via toolbar upload button - ensure accessible
-- **Page number jump input**: click page number text in toolbar to type target page
+- **AI Erase (Smart Content Removal)**: An AI-powered eraser tool that, when the user brushes over text or image content (including text embedded in images), intelligently removes it and fills with the surrounding background. Uses canvas-based inpainting logic (content-aware fill approximation via browser-side algorithms -- no server calls).
+- **Image Editor Mode**: Open any image file (PNG/JPG/WEBP) directly (not just PDFs) and apply all tools to it.
+- **Text in Image Editing**: When user selects text inside a rasterized image area, allow in-place replacement of that text region (erase old text, let user type replacement).
+- **Crop tool**: Crop entire page or selected image region.
+- **Blur/Redact tool**: Blur a selected region (useful for privacy/redaction beyond simple white box).
+- **Color picker / eyedropper**: Sample any color on the canvas.
+- **Watermark tool**: Add repeating diagonal watermark text across entire page.
+- **Page reorder**: Drag-and-drop reorder of pages in the sidebar thumbnail panel.
+- **Merge PDFs**: Upload multiple PDFs and merge them into one.
+- **Split PDF**: Extract specific page ranges into separate download.
+- **Find & Replace text**: Search for text annotations placed in the editor and replace them.
+- **Comment/Review mode**: Add comment threads pinned to locations on the page.
+- **Form field filling**: Detect and fill existing PDF form fields (text input, checkbox, radio).
+- **Dark mode**: Full dark mode UI toggle.
+- **Keyboard shortcut overlay**: Press `?` to see all shortcuts.
+- **Minimap**: Small overview of current page at bottom-right corner.
 
 ### Modify
-- Toolbar expanded to include new tools (grouped: pointer/text, drawing, shapes, annotations, stamps)
-- Types file updated with new element types: highlight, draw, shape, stamp, note, signature
-- Export logic updated to handle all new element types
-- Sidebar adds per-page rotate and delete buttons on hover
+- Erase tool upgraded to also offer the new AI Erase mode as a sub-mode.
+- Toolbar reorganized into logical groups: File, Edit, Annotate, Draw, AI, View.
+- Export dialog with options: quality (72/150/300 dpi equivalent), flatten annotations, password-protect PDF.
+- Undo/redo stack increased; show history panel.
 
 ### Remove
-- Nothing removed
+- Nothing removed; all existing features retained.
 
 ## Implementation Plan
-1. Extend `@/types/pdf.ts` with new types: HighlightElement, DrawElement, ShapeElement, StampElement, NoteElement, SignatureElement; update ToolType union
-2. Update `PDFToolbar.tsx`: add tool groups for new tools, opacity slider for selected element, font family selector, stroke width input, shape sub-tool selector
-3. Update `PDFEditor.tsx`:
-   - Add state and handlers for all new tools
-   - Freehand: track SVG path points on mousemove while mousedown, finalize on mouseup
-   - Shape: preview rect/ellipse/line/arrow while dragging, finalize on mouseup
-   - Stamp: click to place stamp text overlay
-   - Note: click to place sticky note icon; click icon to expand/collapse note text
-   - Signature: open SignaturePad dialog, draw signature, capture as dataUrl, then place as image element
-   - Copy/paste: maintain clipboard state; Ctrl+C copies selectedId element; Ctrl+V pastes with offset
-   - Multi-select: shift+click adds to selection set; drag moves all
-   - Opacity: element-level opacity field; rendered with CSS opacity
-   - Scroll zoom: addEventListener on container for wheel+ctrl
-   - Page management: rotate (track per-page rotation in state, apply when rendering), delete page (filter elements and reindex), add blank page
-4. Create `SignaturePadDialog.tsx`: modal with canvas for freehand signature capture; Clear and Confirm buttons; exports signature as PNG dataUrl
-5. Create `ShortcutHelpPanel.tsx`: triggered by ? key or help button; lists all keyboard shortcuts in a dialog
-6. Update `PDFSidebar.tsx`: add rotate CW/CCW and delete page buttons visible on thumbnail hover
-7. Update export in `PDFEditor.tsx` to handle: highlights (translucent rects), draw paths (embed as PNG snapshot), shapes (rect/ellipse/line via pdf-lib primitives), stamps (text), notes (text), signatures (embedded PNG), page rotations, page deletions
+1. Add `AIErase` canvas brush tool: captures canvas region, runs content-aware fill (patch-match style) client-side, applies result back to canvas layer.
+2. Add `ImageEditor` mode at app level: user can open a standalone image file and edit it with all annotation + AI tools, then download as PNG/JPG.
+3. Add `CropTool`: draws crop rect on page, on confirm re-renders canvas clipped to selection.
+4. Add `BlurTool`: captures selection region, applies box blur via OffscreenCanvas, composites back.
+5. Add `WatermarkTool`: renders repeating diagonal text across page canvas layer.
+6. Implement page drag-and-drop reorder in sidebar.
+7. Add Merge PDF: accept multiple PDFs, combine page lists, render all pages.
+8. Add Split PDF: dialog to select page range, export subset.
+9. Add Find & Replace for text elements.
+10. Add Comment/review system: pin comments to coordinates, show comment panel.
+11. Add form field detection (pdf.js `getAnnotations`) and rendering.
+12. Add dark mode with CSS variable toggle.
+13. Add export dialog with quality and password options.
+14. Add undo history panel.
+15. Refactor toolbar into grouped sections.

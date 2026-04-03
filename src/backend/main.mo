@@ -1,22 +1,34 @@
+import Runtime "mo:core/Runtime";
+import Principal "mo:core/Principal";
 import Map "mo:core/Map";
 import Text "mo:core/Text";
-import Runtime "mo:core/Runtime";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
-  let userPreferences = Map.empty<Text, Text>();
-
-  public shared ({ caller }) func setPreference(key : Text, value : Text) : async () {
-    userPreferences.add(key, value);
-  };
-
-  public query ({ caller }) func getPreference(key : Text) : async Text {
-    switch (userPreferences.get(key)) {
-      case (null) { Runtime.trap("Preference not found") };
-      case (?value) { value };
+  type Preferences = {
+    darkMode : Bool;
+    recentTools : [Text];
+    sessionMetadata : ?{
+      fileName : Text;
+      pageCount : Nat;
     };
   };
 
-  public query ({ caller }) func ping() : async Bool {
-    true;
+  let preferences = Map.empty<Principal, Preferences>();
+
+  public shared ({ caller }) func setPreferences(prefs : Preferences) : async () {
+    if (caller.isAnonymous()) {
+      Runtime.trap("Anonymous users cannot set preferences");
+    };
+    preferences.add(caller, prefs);
+  };
+
+  public query ({ caller }) func getPreferences() : async Preferences {
+    switch (caller.isAnonymous(), preferences.get(caller)) {
+      case (true, null) { Runtime.trap("Anonymous users cannot have preferences") };
+      case (_, ?prefs) { prefs };
+      case (_, null) { Runtime.trap("Preferences not found") };
+    };
   };
 };
